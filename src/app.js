@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const PQueue = require('p-queue').default;
+const { default: PQueue } = require('p-queue');
 const { buildQueries, search } = require('./serp');
 const { crawlAndDetect } = require('./detection');
 const { exportToExcel } = require('./export');
