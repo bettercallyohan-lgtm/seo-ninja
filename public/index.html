@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Ninja Linking Spot Finder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;max-width:680px;margin:40px auto;padding:0 16px;}
+    h1{font-size:22px;margin-bottom:12px}
+    form{display:flex;gap:8px;align-items:center}
+    input[type=text]{flex:1;padding:10px;border:1px solid #ccc;border-radius:8px;font-size:16px}
+    button{padding:10px 16px;border:0;border-radius:8px;background:#111;color:#fff;font-size:16px}
+    .muted{color:#666;font-size:13px;margin-top:6px}
+    .box{border:1px solid #eee;border-radius:10px;padding:12px;margin-top:16px}
+    .ok{color:#0a7a2d}
+    .warn{color:#b15a00}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;white-space:pre-wrap}
+    a.button{display:inline-block;margin-top:8px;padding:8px 12px;background:#0a7a2d;color:#fff;text-decoration:none;border-radius:8px}
+  </style>
+</head>
+<body>
+  <h1>Ninja Linking Spot Finder</h1>
+  <form method="post" action="/run">
+    <input type="text" name="keyword" placeholder="Ton mot-clé (ex: recettes de cuisine)" required>
+    <button type="submit">Run</button>
+  </form>
+  <p class="muted">Astuce : mets des mots-clés précis (ex: “recette tarte citron”, “ustensiles pâtisserie”).</p>
+
+  <!-- Résultat simple si renvoyé côté serveur -->
+  <!-- Le serveur renvoie une page avec résumé + lien de téléchargement -->
+</body>
+</html>
