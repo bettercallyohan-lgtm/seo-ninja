@@ -1,38 +1,35 @@
-// server.js — point d'entrée SEO Ninja
-require('dotenv').config();
+// server.js
 const express = require("express");
 const path = require("path");
-
-// Nos modules internes
-const { runSearch } = require("./src/app");
+const bodyParser = require("body-parser");
+const { runOnce } = require("./src/app"); // 👈 correction ici
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middlewares
-app.use(express.json()); // remplace body-parser
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "public"))); // sert index.html et assets
+app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, "public")));
 
-// Page d'accueil (optionnel si tu sers déjà /public)
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
-
-// API: lancer la recherche
 app.post("/search", async (req, res) => {
   try {
-    const keyword = (req.body.keyword || "").trim();
-    if (!keyword) {
+    const { keyword } = req.body;
+    if (!keyword || keyword.trim() === "") {
       return res.status(400).json({ error: "Keyword manquant." });
     }
 
     console.log(`🔎 Recherche lancée avec le mot-clé : ${keyword}`);
-    const results = await runSearch(keyword); // doit être exporté depuis src/app.js
+
+    // Ici tu appelles runOnce avec une config
+    const results = await runOnce({
+      keyword,
+      concurrency: { max_tasks: 3, min_delay_ms: 500, max_delay_ms: 1500 },
+      scoring: { threshold: 60 },
+      export: { path: "./output/spots.xlsx" }
+    });
 
     res.json({ success: true, results });
   } catch (err) {
-    console.error("❌ Erreur dans /search :", err);
+    console.error("❌ Erreur dans /search :", err.message);
     res.status(500).json({ error: "Erreur interne du serveur" });
   }
 });
