@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { default: PQueue } = require('p-queue');
+const PQueue = require('p-queue');           // <-- CommonJS-friendly
 const { buildQueries, search } = require('./serp');
 const { crawlAndDetect } = require('./detection');
 const { exportToExcel } = require('./export');
@@ -28,15 +28,14 @@ async function runOnce(cfg) {
       log(`• ${urls.length} URL(s) depuis la requête : ${q}`);
 
       for (const url of urls) {
-        if (seen.has(url)) continue;
+        if (seen.has(url)) return;
         seen.add(url);
         try {
           const row = await crawlAndDetect(url, q, cfg);
-          if (!row) continue;
+          if (!row) return;
 
-          // Ne garder que les pages en FR si possible
           const isFR = (row.language_detected || '').startsWith('fr');
-          if (!isFR) continue;
+          if (!isFR) return;
 
           if (row.quality_score >= (cfg.scoring?.threshold ?? 60)) {
             results.push(row);
