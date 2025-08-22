@@ -1,0 +1,13 @@
+# Configuration des footprints pour détecter les zones de commentaires
+# Tu pourras enrichir cette liste en fonction de tes besoins
+footprints:
+  - "Laisser un commentaire"
+  - "Votre adresse e-mail ne sera pas publiée"
+  - "Ajouter un commentaire"
+  - "Écrire un commentaire"
+  - "Submit Comment"
+  - "postcomment"
+  search:
+  engine: "serper"
+  limit_per_query: 40
+  market: "fr-FR"   # (ignoré par Serper, mais tu peux laisser)
