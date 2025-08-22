@@ -1,0 +1,21 @@
+{
+  "name": "seo-ninja",
+  "version": "1.1.0",
+  "description": "UI simple: un champ keyword + bouton Run. Trouve des spots FR avec espace commentaire et dofollow probable, export Excel.",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.7",
+    "cheerio": "^1.0.0-rc.12",
+    "dotenv": "^16.4.0",
+    "express": "^4.19.2",
+    "p-queue": "^7.4.1",
+    "robots-parser": "^3.0.1",
+    "tldts": "^6.1.33",
+    "xlsx": "^0.18.5",
+    "yaml": "^2.4.0"
+  }
+}
