@@ -5,16 +5,43 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <body style="font-family:system-ui;max-width:680px;margin:40px auto;padding:0 16px">
   <h1>Ninja Linking Spot Finder</h1>
-  <!-- IMPORTANT : method="post", action="/run" et name="keyword" -->
-  <form method="post" action="/run">
-    <input type="text" name="keyword" placeholder="Ton mot-clé (ex: recettes de cuisine)" required
-           style="flex:1;padding:10px;border:1px solid #ccc;border-radius:8px;font-size:16px;width:70%">
-    <button type="submit" style="padding:10px 16px;border:0;border-radius:8px;background:#111;color:#fff;font-size:16px">
+
+  <div style="display:flex;gap:8px;align-items:center">
+    <input id="kw" type="text" placeholder="Ton mot-clé (ex: recettes de cuisine)" required
+           style="flex:1;padding:10px;border:1px solid #ccc;border-radius:8px;font-size:16px">
+    <button id="runBtn" style="padding:10px 16px;border:0;border-radius:8px;background:#111;color:#fff;font-size:16px">
       Run
     </button>
-  </form>
+  </div>
+
   <p style="color:#666;font-size:13px;margin-top:6px">
     Astuce : utilise des mots-clés précis (ex: “recette tarte citron”, “ustensiles pâtisserie”).
   </p>
+
+  <div id="out" style="border:1px solid #eee;border-radius:10px;padding:12px;margin-top:16px;white-space:pre-wrap;font-family:ui-monospace,monospace;font-size:12px"></div>
+
+  <script>
+    const btn = document.getElementById('runBtn');
+    const kw  = document.getElementById('kw');
+    const out = document.getElementById('out');
+
+    btn.addEventListener('click', async () => {
+      const keyword = kw.value.trim();
+      if (!keyword) { alert('Merci de saisir un mot-clé'); return; }
+
+      out.textContent = '⏳ Recherche en cours...';
+      try {
+        const r = await fetch('/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ keyword })
+        });
+        const txt = await r.text();    // le serveur renvoie du HTML
+        document.open(); document.write(txt); document.close();
+      } catch (e) {
+        out.textContent = 'Erreur: ' + (e && e.message ? e.message : e);
+      }
+    });
+  </script>
 </body>
 </html>
