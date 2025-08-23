@@ -1,84 +1,54 @@
-require('dotenv').config();
+// server.js — MODE DIAGNOSTIC MINIMAL
 const express = require('express');
-const path = require('path');
-const fs = require('fs');
-const YAML = require('yaml');
-const { runOnce } = require('./src/app');
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middlewares pour JSON et formulaires
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Fichiers statiques (sert index.html)
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Log simple pour debug
-app.use((req, _res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-  next();
-});
-
-// Page d'accueil (au cas où)
+// Petite page de test (champ + bouton)
 app.get('/', (_req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.send(`<!doctype html><meta charset="utf-8">
+  <body style="font-family:sans-serif;padding:24px">
+    <h1>Test POST /run</h1>
+    <div style="display:flex;gap:8px">
+      <input id="kw" placeholder="mot-clé" style="padding:8px;flex:1">
+      <button id="go" style="padding:8px 12px">Run</button>
+    </div>
+    <pre id="out" style="margin-top:12px;white-space:pre-wrap"></pre>
+    <script>
+      const go = document.getElementById('go');
+      const kw = document.getElementById('kw');
+      const out = document.getElementById('out');
+      go.onclick = async () => {
+        const keyword = (kw.value||'').trim();
+        out.textContent = 'Envoi...';
+        try {
+          const r = await fetch('/run', {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ keyword })
+          });
+          const txt = await r.text();
+          out.textContent = txt;
+        } catch(e){ out.textContent = 'Erreur: '+e.message; }
+      };
+    </script>
+  </body>`);
 });
 
-// Si quelqu’un fait GET /run par erreur, on explique :
+// La route à tester
+app.post('/run', (req, res) => {
+  const keyword = (req.body?.keyword || '').trim();
+  console.log('POST /run reçu, keyword =', keyword);
+  res.type('text/plain').send(`OK ✅ POST /run reçu.\nkeyword = "${keyword}"`);
+});
+
+// Sécurité : message clair si on tape /run en GET
 app.get('/run', (_req, res) => {
-  res.status(405).send('<p>Cette URL accepte uniquement POST. Retournez à <a href="/">l’interface</a> et cliquez sur le bouton Run.</p>');
-});
-
-// POST /run = lance la recherche
-app.post('/run', async (req, res) => {
-  try {
-    const keyword = (req.body.keyword || '').trim();
-    if (!keyword) return res.status(400).send('<p>Mot-clé manquant. <a href="/">Retour</a></p>');
-
-    // charge config.yaml et remplace le keyword
-    const cfgPath = path.join(__dirname, 'config.yaml');
-    const cfg = YAML.parse(fs.readFileSync(cfgPath, 'utf8'));
-    cfg.keyword = keyword;
-
-    const { outPath, count, logs } = await runOnce(cfg);
-
-    const rel = path.relative(path.join(__dirname), outPath).replace(/\\/g,'/');
-    const html = `
-      <!doctype html><html lang="fr"><meta charset="utf-8">
-      <title>Résultats</title>
-      <body style="font-family:system-ui;padding:24px;max-width:780px;margin:auto">
-      <h2>Terminé ✅</h2>
-      <p><strong>Mot-clé :</strong> ${escapeHtml(keyword)}</p>
-      <p><strong>Spots retenus :</strong> ${count}</p>
-      <p><a class="button" style="display:inline-block;padding:10px 14px;background:#0a7a2d;color:#fff;text-decoration:none;border-radius:8px" href="/download?f=${encodeURIComponent(rel)}">Télécharger spots.xlsx</a></p>
-      <div style="border:1px solid #eee;border-radius:10px;padding:12px;margin-top:16px">
-        <div style="color:#666;font-size:13px;margin-bottom:6px">Journal</div>
-        <pre style="white-space:pre-wrap;font-family:ui-monospace,monospace;font-size:12px">${escapeHtml(logs.join('\n'))}</pre>
-      </div>
-      <p style="margin-top:20px"><a href="/">⟵ Revenir</a></p>
-      </body></html>
-    `;
-    res.send(html);
-  } catch (e) {
-    console.error(e);
-    res.status(500).send(`<p>Erreur: ${escapeHtml(e.message)}. <a href="/">Retour</a></p>`);
-  }
-});
-
-app.get('/download', (req, res) => {
-  const rel = req.query.f || '';
-  const abs = path.join(__dirname, rel);
-  if (!fs.existsSync(abs)) return res.status(404).send('Fichier introuvable.');
-  res.download(abs, 'spots.xlsx');
+  res.status(405).send('Cette URL accepte uniquement POST. Retour à /.');
 });
 
 const server = app.listen(PORT, () => {
-  const actual = server.address().port;
-  console.log(`🚀 Serveur SEO Ninja lancé sur http://localhost:${actual}`);
+  console.log('🚀 Serveur DIAG sur port', server.address().port);
 });
-
-function escapeHtml(s='') {
-  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
